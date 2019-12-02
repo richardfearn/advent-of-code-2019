@@ -2,6 +2,7 @@
 
 import sys
 
+
 def fuel_required(mass):
     total_fuel = 0
     while mass > 0:
@@ -11,11 +12,16 @@ def fuel_required(mass):
         mass = fuel
     return total_fuel
 
-masses = sys.stdin.readlines()
-masses = list(map(int, masses))
 
-fuel = list(map(fuel_required, masses))
-for f in fuel:
-    print(f)
+def main():
 
-print("Total: %d" % sum(fuel))
+    masses = sys.stdin.readlines()
+    masses = list(map(int, masses))
+
+    fuel = list(map(fuel_required, masses))
+
+    print(sum(fuel))
+
+
+if __name__ == "__main__":
+    main()
