@@ -1,6 +1,7 @@
 #! /usr/bin/python3
 
 import unittest
+import utils
 from day3 import part1, part2
 
 
@@ -27,6 +28,10 @@ class Part1Tests(unittest.TestCase):
                 "U98,R91,D20,R16,D67,R40,U7,R15,U6,R7"]),
             135)
 
+    def test_with_input(self):
+        lines = utils.read_input()
+        self.assertEqual(part1.calc_min_distance(lines), 1264)
+
 
 class Part2Tests(unittest.TestCase):
 
@@ -50,6 +55,10 @@ class Part2Tests(unittest.TestCase):
                 "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51",
                 "U98,R91,D20,R16,D67,R40,U7,R15,U6,R7"]),
             410)
+
+    def test_with_input(self):
+        lines = utils.read_input()
+        self.assertEqual(part2.calc_min_steps(lines), 37390)
 
 
 if __name__ == '__main__':
