@@ -209,6 +209,12 @@ class Direction(Enum):
     DOWN = 2
     LEFT = 3
 
+    def left(self):
+        return list(Direction.__members__.values())[(self.value - 1) % 4]
+
+    def right(self):
+        return list(Direction.__members__.values())[(self.value + 1) % 4]
+
 
 ROBOT_DIR_MAP = {
     VACUUM_ROBOT_UP_CHAR: Direction.UP,
@@ -264,6 +270,8 @@ class View:
 
         self.grid = [[CHAR_TO_TYPE_MAP[c] for c in line] for line in self.grid]
 
+        self.end_pos = None
+
     def find_intersections(self):
 
         intersections = []
@@ -278,3 +286,49 @@ class View:
 
     def is_scaffold(self, x, y):
         return self.grid[y][x] == Tile.SCAFFOLD
+
+    def path_to_other_end(self):
+
+        moves = []
+
+        while self.robot_pos != self.end_pos:
+
+            left_dir = self.robot_dir.left()
+            right_dir = self.robot_dir.right()
+
+            left_pos = calc_next_pos(self.robot_pos, left_dir)
+            right_pos = calc_next_pos(self.robot_pos, right_dir)
+
+            if self.in_grid(left_pos) and self.grid[left_pos.y][left_pos.x] == Tile.SCAFFOLD:
+                self.robot_dir = left_dir
+                moves.append("L")
+
+            elif self.in_grid(right_pos) and self.grid[right_pos.y][right_pos.x] == Tile.SCAFFOLD:
+                self.robot_dir = right_dir
+                moves.append("R")
+
+            moves.append(0)
+
+            while True:
+
+                next_pos = calc_next_pos(self.robot_pos, self.robot_dir)
+                if not self.in_grid(next_pos) or self.grid[next_pos.y][next_pos.x] != Tile.SCAFFOLD:
+                    break
+                moves[-1] += 1
+                self.robot_pos = next_pos
+
+        return ",".join([str(x) for x in moves])
+
+    def in_grid(self, pos):
+        return 0 <= pos.x < self.width and 0 <= pos.y < self.height
+
+
+def calc_next_pos(pos, direction):
+    if direction == Direction.UP:
+        return Point(pos.x, pos.y - 1)
+    elif direction == Direction.DOWN:
+        return Point(pos.x, pos.y + 1)
+    elif direction == Direction.LEFT:
+        return Point(pos.x - 1, pos.y)
+    elif direction == Direction.RIGHT:
+        return Point(pos.x + 1, pos.y)
