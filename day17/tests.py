@@ -1,7 +1,8 @@
 #! /usr/bin/python3
 
 import unittest
-from day17.set_and_forget import Program, Cameras, View
+from intcode import Program
+from day17.set_and_forget import Cameras, View
 import utils
 
 PART_1_EXAMPLE_1 = """
