@@ -20,6 +20,34 @@ class Network:
                         self.computers[p.address].deliver(p)
 
 
+class NetworkWithNAT:
+
+    def __init__(self, instructions):
+        self.computers = [Computer(i, Program(instructions)) for i in range(50)]
+        self.nat = NAT(self)
+
+    def get_first_y_value_delivered_twice(self):
+
+        y_values_sent_by_nat = set()
+
+        while True:
+
+            for c in self.computers:
+                sent = c.run()
+                for p in sent:
+                    if p.address == 255:
+                        self.nat.deliver(p)
+                    else:
+                        self.computers[p.address].deliver(p)
+
+            packet_sent_by_nat = self.nat.monitor()
+            if packet_sent_by_nat is not None:
+                if packet_sent_by_nat.y in y_values_sent_by_nat:
+                    return packet_sent_by_nat.y
+                else:
+                    y_values_sent_by_nat.add(packet_sent_by_nat.y)
+
+
 class Computer:
 
     def __init__(self, address, program):
@@ -56,6 +84,24 @@ class Computer:
 
     def deliver(self, packet):
         self.received.append(packet)
+
+
+class NAT:
+
+    def __init__(self, network):
+        self.network = network
+        self.received = None
+
+    def deliver(self, packet):
+        self.received = packet
+
+    def monitor(self):
+        total_packets = sum(len(c.received) for c in self.network.computers)
+        if total_packets == 0:
+            self.network.computers[0].deliver(self.received)
+            return self.received
+        else:
+            return None
 
 
 def chunks(lst, n):
