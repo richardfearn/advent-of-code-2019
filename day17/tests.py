@@ -2,7 +2,7 @@
 
 import unittest
 from intcode import Program
-from day17.set_and_forget import Cameras, View
+from day17.set_and_forget import Cameras, View, VacuumRobot
 import utils
 
 PART_1_EXAMPLE_1 = """
@@ -67,12 +67,17 @@ class Part2Tests(unittest.TestCase):
         self.assertEqual(PART_2_EXAMPLE_1_PATH, view.path_to_other_end())
 
     def test_with_input(self):
+
         program = Program(read_input())
         cameras = Cameras(program)
         view = cameras.get_view()
-        print(view.text)
         view.end_pos = (32, 42)
         self.assertEqual(PART_2_INPUT_PATH, view.path_to_other_end())
+
+        program = Program(read_input())
+        program.memory[0] = 2
+        robot = VacuumRobot(program)
+        self.assertEqual(982279, robot.get_collected_dust(PART_2_INPUT_PATH))
 
 
 def read_program(line):

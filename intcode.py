@@ -171,3 +171,30 @@ class Program:
 
             else:
                 raise Exception("Unknown opcode %d" % instruction.opcode)
+
+    def send_ascii_and_get_reply(self, text):
+        outputs = self.send_ascii_and_get_outputs(text)
+        return self._outputs_to_text(outputs)
+
+    def send_ascii_and_get_outputs(self, text):
+        inputs = [ord(c) for c in text] + [10]
+        outputs = self._run_and_get_outputs(inputs)
+        return outputs
+
+    def get_ascii(self):
+        outputs = self._run_and_get_outputs()
+        return self._outputs_to_text(outputs)
+
+    def _run_and_get_outputs(self, inputs=None):
+        received = []
+        while True:
+            output = self.run(inputs)
+            if (output == "need_input") or (output == "halt"):
+                return received
+            if isinstance(output, tuple) and output[0] == 'output':
+                received.append(output[1])
+            inputs = None  # so the inputs are only sent once
+
+    @staticmethod
+    def _outputs_to_text(outputs):
+        return "".join(chr(c) for c in outputs).strip()

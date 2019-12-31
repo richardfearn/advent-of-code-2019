@@ -2,6 +2,9 @@
 
 from enum import Enum
 import collections
+import utils
+import string
+import re
 
 SCAFFOLD_CHAR = '#'
 OPEN_SPACE_CHAR = '.'
@@ -157,3 +160,73 @@ def calc_next_pos(pos, direction):
         return Point(pos.x - 1, pos.y)
     elif direction == Direction.RIGHT:
         return Point(pos.x + 1, pos.y)
+
+
+class VacuumRobot:
+
+    def __init__(self, program):
+        self.program = program
+
+    def get_collected_dust(self, path):
+        main_routine, (a, b, c) = self.determine_move_functions(path)
+        return self.run(main_routine, a, b, c)
+
+    @staticmethod
+    def determine_move_functions(path):
+
+        # Try different lengths for A (moves at the beginning of the path) and
+        # C (moves at the end of the path). After replacing moves in the path
+        # with A/C, if there's only one distinct substring left in the string,
+        # we have found B.
+
+        # Convert path to list of moves - ['L1', 'R2', 'L3', ...]
+        moves = [m[0] + m[1] for m in utils.chunks(path.split(","), 2)]
+
+        # Assign a lower-case letter to each distinct move
+        unique_moves = set(moves)
+        letters = list(string.ascii_lowercase[:len(unique_moves)])
+        moves_to_letters = dict(zip(unique_moves, letters))
+        letters_to_moves = {v: k for k, v in moves_to_letters.items()}
+
+        # Convert path to a string of characters - 'ddbbc...'
+        path_str = "".join([moves_to_letters[m] for m in moves])
+
+        # This converts a series of letters ('abc...') to a path ('L,1,R,2,L,3...')
+        def expand_movement_function(s):
+            return ",".join([letters_to_moves[ch] for ch in s]).replace("L", "L,").replace("R", "R,")
+
+        # Now try different lengths...
+
+        a_len = c_len = 1
+
+        while True:
+
+            a = path_str[:a_len]
+            c = path_str[-c_len:]
+            new_path_str = path_str.replace(a, "A").replace(c, "C")
+            other_substrings = [s for s in re.split("[AC]", new_path_str) if s]
+
+            if len(set(other_substrings)) == 1:
+
+                b = other_substrings[0]
+                new_path_str = new_path_str.replace(b, "B")
+                main_routine = ",".join(list(new_path_str))
+                (a, b, c) = [expand_movement_function(f) for f in (a, b, c)]
+
+                # Check lengths of main routine / movement functions
+                if max(len(s) for s in (main_routine, a, b, c)) <= 20:
+                    return main_routine, (a, b, c)
+
+            if a_len == c_len:
+                a_len += 1
+            else:
+                c_len += 1
+
+    def run(self, main_routine, a, b, c):
+        self.program.get_ascii()  # Consume map and "Main:"
+        self.program.send_ascii_and_get_reply(main_routine)
+        self.program.send_ascii_and_get_reply(a)
+        self.program.send_ascii_and_get_reply(b)
+        self.program.send_ascii_and_get_reply(c)
+        a = self.program.send_ascii_and_get_outputs("n")
+        return a[-1]
