@@ -25,3 +25,36 @@ class FFT:
 
     def as_string(self):
         return "".join([str(v) for v in self.values])
+
+
+def part2(signal):
+
+    """
+    The important thing for solving part 2 efficiently is that, for any digit in the 2nd half of the message, the
+    pattern to use is some number of 0s followed by some number of 1s.
+
+    The last digit of the output signal is the last digit of the input signal; the 2nd to last digit of the output
+    signal is the sum of the last 2 digits (mod 10); and so on.
+
+    We can calculate each digit in the output message by working backwards, starting with the last digit, and keeping
+    a running total of the digits so far.
+
+    The offsets in the part 2 examples, and in my input, all place the 8-digit message in the 2nd half of the signal.
+    """
+
+    offset = int(signal[0:7])
+
+    if offset < len(signal) / 2:
+        raise Exception("Message is not in the 2nd half of the signal")
+
+    signal = [int(c) for c in signal]
+
+    for phase in range(100):
+        total = 0
+        for i in range(len(signal)-1, offset-1, -1):
+            total += signal[i]
+            signal[i] = (total % 10)
+
+    message = signal[offset:offset+8]
+    message = "".join([str(n) for n in message])
+    return message

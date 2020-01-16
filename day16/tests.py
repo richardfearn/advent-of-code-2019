@@ -1,7 +1,7 @@
 #! /usr/bin/python3
 
 import unittest
-from day16.flawed_frequency_transmission import FFT
+from day16.flawed_frequency_transmission import FFT, part2
 import utils
 
 
@@ -51,6 +51,25 @@ class Part1Tests(unittest.TestCase):
         for i in range(100):
             fft.calculate()
         self.assertEqual("61149209", fft.as_string()[:8])
+
+
+class Part2Tests(unittest.TestCase):
+
+    def test_example_1(self):
+        (signal, message) = ("03036732577212944063491565474664" * 10000, "84462026")
+        self.assertEqual(message, part2(signal))
+
+    def test_example_2(self):
+        (signal, message) = ("02935109699940807407585447034323" * 10000, "78725270")
+        self.assertEqual(message, part2(signal))
+
+    def test_example_3(self):
+        (signal, message) = ("03081770884921959731165446850517" * 10000, "53553731")
+        self.assertEqual(message, part2(signal))
+
+    def test_with_input(self):
+        signal = read_input() * 10000
+        self.assertEqual("16178430", part2(signal))
 
 
 def read_input():
