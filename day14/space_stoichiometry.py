@@ -55,6 +55,43 @@ class Nanofactory:
 
     def __init__(self, lines):
         self.reactions = [Reaction.from_line(line) for line in lines]
+        self.reaction_order = self.topological_sort()
+
+    def topological_sort(self):
+
+        nodes = set()
+        for r in self.reactions:
+            nodes.update([i.name for i in r.inputs])
+            nodes.add(r.output.name)
+
+        incoming = {}
+        outgoing = {}
+        for n in nodes:
+            incoming[n] = set()
+            outgoing[n] = set()
+
+        for r in self.reactions:
+            for i in r.inputs:
+                incoming[r.output.name].add(i.name)
+                outgoing[i.name].add(r.output.name)
+
+        sorted_elements = []
+        no_incoming = {ORE}
+
+        while len(no_incoming) > 0:
+            n = no_incoming.pop()
+            sorted_elements.append(n)
+            while len(outgoing[n]) > 0:
+                m = outgoing[n].pop()
+                incoming[m].remove(n)
+                if len(incoming[m]) == 0:
+                    no_incoming.add(m)
+
+        if sum(len(e) for e in outgoing.values()) > 0:
+            raise Exception("Graph has cycle")
+
+        sorted_elements.remove(ORE)
+        return sorted_elements
 
     def calc_min_ore_required(self):
 
@@ -64,15 +101,9 @@ class Nanofactory:
         for r in self.reactions:
             reaction_for_chem[r.output.name] = r
 
-        while True:
-
-            need_converting = [c for c in set(chemicals.keys()) if c != ORE and chemicals[c] > 0]
-
-            if len(need_converting) == 0:
-                break
-
-            chem_to_convert = list(need_converting)[0]
-            reaction_to_reverse = reaction_for_chem[chem_to_convert]
-            chemicals = reaction_to_reverse.reverse(chemicals)
+        for i in reversed(self.reaction_order):
+            reaction = reaction_for_chem[i]
+            while (i in chemicals) and (chemicals[i] > 0):
+                chemicals = reaction.reverse(chemicals)
 
         return chemicals[ORE]
