@@ -104,6 +104,29 @@ class Part1Tests(unittest.TestCase):
         self.assertEqual(431448, factory.calc_min_ore_required())
 
 
+class Part2Tests(unittest.TestCase):
+
+    def test_larger_example_1(self):
+        lines = lines_from_text(PART_1_LARGER_EXAMPLE_1)
+        factory = Nanofactory(lines)
+        self.assertEqual(82892753, factory.calc_max_fuel())
+
+    def test_larger_example_2(self):
+        lines = lines_from_text(PART_1_LARGER_EXAMPLE_2)
+        factory = Nanofactory(lines)
+        self.assertEqual(5586022, factory.calc_max_fuel())
+
+    def test_larger_example_3(self):
+        lines = lines_from_text(PART_1_LARGER_EXAMPLE_3)
+        factory = Nanofactory(lines)
+        self.assertEqual(460664, factory.calc_max_fuel())
+
+    def test_with_input(self):
+        lines = utils.read_input()
+        factory = Nanofactory(lines)
+        self.assertEqual(3279311, factory.calc_max_fuel())
+
+
 def lines_from_text(text):
     return text.strip().split("\n")
 
